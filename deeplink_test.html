@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>딥링크 테스트</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      text-align: center;
+    }
+    button {
+      font-size: 1.2rem;
+      padding: 1rem 2rem;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>📱 딥링크 테스트</h1>
+  <p>앱이 설치되어 있으면 앱이 실행되고,<br>설치되어 있지 않으면 웹페이지 또는 앱스토어로 이동합니다.</p>
+
+  <button onclick="openApp()">앱 실행하기</button>
+
+  <script>
+    const eventNo = "316";
+    const fallbackURL = "https://www.example.com/webview/page123"; // 웹 fallback 주소
+    const iosAppStoreURL = "https://apps.apple.com/kr/app/lg%EC%A0%84%EC%9E%90-%EB%A9%A4%EB%B2%84%EC%8B%AD/id1406622899";
+
+    function openApp() {
+      const isAndroid = /Android/i.test(navigator.userAgent);
+      const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+      if (isAndroid) {
+        const intentURL = "intent://share?eventNo=" + eventNo +
+          "#Intent;scheme=lgemma;package=com.lge.lgemembership;end";
+
+        const start = Date.now();
+        location.href = intentURL;
+
+        setTimeout(() => {
+          if (Date.now() - start < 2000) {
+            window.location.href = fallbackURL;
+          }
+        }, 1500);
+
+      } else if (isIOS) {
+        const appURL = "lgemma://share?eventNo=" + eventNo;
+
+        const openAt = Date.now();
+        setTimeout(() => {
+          if (Date.now() - openAt < 3000) {
+            location.href = iosAppStoreURL;
+          }
+        }, 2500);
+
+        setTimeout(() => {
+          location.href = appURL;
+        }, 0);
+
+      } else {
+        alert("이 기능은 모바일 디바이스에서 테스트해주세요.");
+      }
+    }
+  </script>
+</body>
+</html>
