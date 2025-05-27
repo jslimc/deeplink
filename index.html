@@ -2,71 +2,55 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>롯데월드 앱 실행</title>
-  <style>
-    body { font-family: sans-serif; text-align: center; padding: 2rem; }
-    button {
-      padding: 1rem 2rem;
-      font-size: 1.1rem;
-      background-color: #ff4081;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 </head>
 <body>
-  <h1>🎡 롯데월드 앱 실행하기</h1>
-  <p>앱이 설치되어 있으면 실행되고,<br />설치되어 있지 않으면 fallback 주소로 이동합니다.</p>
-
-  <button onclick="openApp()">앱 실행하기</button>
-
   <script>
     function getQueryParam(name) {
       const params = new URLSearchParams(window.location.search);
       return params.get(name);
     }
 
-    const fallbackURL = getQueryParam("fallback") || "https://www.lotteworld.com";
+    const fallback = getQueryParam('fallback') || 'https://www.lotteworld.com';
+    const encodedFallback = encodeURIComponent(fallback);
 
-    const iosAppStoreURL = "https://apps.apple.com/kr/app/%EB%A1%AF%EB%8D%B0%EC%9B%94%EB%93%9C-%EC%96%B4%EB%93%9C%EB%B2%A4%EC%B2%98/id1068393382";
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-    const iosScheme = `com.lotteworld.ticket.adventure://open?fallback=${encodeURIComponent(fallbackURL)}`;
-    const androidIntentURL = `intent://open?fallback=${encodeURIComponent(fallbackURL)}#Intent;scheme=com.lotteworld.ticket.adventure;package=com.lotteworld.ticket.adventure;end`;
+    const iosScheme = `com.lotteworld.ticket.adventure://open?fallback=${encodedFallback}`;
+    const iosStoreURL = "https://apps.apple.com/kr/app/%EB%A1%AF%EB%8D%B0%EC%9B%94%EB%93%9C-%EC%96%B4%EB%93%9C%EB%B2%A4%EC%B2%98/id1068393382";
+    const androidIntent = `intent://open?fallback=${encodedFallback}#Intent;scheme=com.lotteworld.ticket.adventure;package=com.lotteworld.ticket.adventure;end`;
 
     function openApp() {
-      const isAndroid = /Android/i.test(navigator.userAgent);
-      const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+      const now = Date.now();
 
       if (isAndroid) {
-        const start = Date.now();
-        location.href = androidIntentURL;
-
+        location.href = androidIntent;
         setTimeout(() => {
-          if (Date.now() - start < 2000) {
-            location.href = fallbackURL;
+          if (Date.now() - now < 2000) {
+            location.href = fallback;
           }
         }, 1500);
-
       } else if (isIOS) {
-        const openAt = Date.now();
-
+        // iOS는 앱 스토어 → fallback 순서로 조정
+        const clicked = Date.now();
         setTimeout(() => {
-          if (Date.now() - openAt < 3000) {
-            location.href = iosAppStoreURL;
+          if (Date.now() - clicked < 2000) {
+            // fallback으로 이동
+            location.href = fallback;
           }
-        }, 2500);
-
-        setTimeout(() => {
-          location.href = iosScheme;
-        }, 0);
-
+        }, 1500);
+        // 앱 실행
+        location.href = iosScheme;
       } else {
-        alert("모바일 기기에서만 지원됩니다.");
+        // 그 외 환경에서는 fallback
+        location.href = fallback;
       }
     }
+
+    // 페이지 로드시 바로 실행
+    window.onload = openApp;
   </script>
 </body>
 </html>
